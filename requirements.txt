@@ -1,0 +1,4 @@
+speech_recognition
+requests
+groq
+pyttsx3
