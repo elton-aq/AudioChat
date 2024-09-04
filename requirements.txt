@@ -2,4 +2,4 @@ speech_recognition
 requests
 groq
 pyttsx3
-streamlit
+python-dotenv

@@ -1,9 +1,11 @@
 import os
 import requests
 from groq import Groq
+from dotenv import load_dotenv
 
 # Função para gerar resposta usando o Llama
 def generate_answer_llama(chat_history):
+    load_dotenv()
     client = Groq(api_key=os.getenv("API_KEY"))
 
     try:
