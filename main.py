@@ -24,19 +24,19 @@ def capturaAudio():
 
 def process_audio():
     try:
-        yield [(f"Processando fala...", None)], None, "Aguarde 2s e fale algo."
+        yield [(f"Processando fala...", None)], None, "Aguarde 2 segundo e fale algo."
         question = capturaAudio()
         if not question:
             return [(f"Erro ao capturar áudio.", None)], None, "Erro ao capturar áudio."
 
         print(f'Texto reconhecido: {question}')
-        chat_history.append({"role": "user", "content": f"👤: {question}"})
+        chat_history.append({"role": "user", "content": f"{question}"})
 
         yield None, None, "Gerando resposta..."
         answer = chat.generate_answer_llama(chat_history)
         print(f'Resposta Gerada: {answer}')
 
-        chat_history.append({"role": "assistant", "content": f"🤖: {answer}"})
+        chat_history.append({"role": "assistant", "content": f"{answer}"})
 
         yield None, None, "Processando áudio..."
         audio_file_path = "output.mp3"
@@ -58,7 +58,8 @@ with gr.Blocks() as app:
     chatbot = gr.Chatbot(
         label="Chat",
         layout="bubble",
-        bubble_full_width=True
+        bubble_full_width=True,
+        avatar_images=("icon/user.png", "icon/robot.png")
     )
 
     status_display = gr.Textbox(
