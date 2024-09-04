@@ -1,9 +1,5 @@
-import pyttsx3
+from gtts import gTTS
 
-def speak(answer):   
-    # Inicializa o motor TTS
-    engine = pyttsx3.init()
-    voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[83].id)  
-    engine.say(answer)
-    engine.runAndWait()
+def speak(text, file_path):
+    tts = gTTS(text=text, lang='pt')
+    tts.save(file_path)
