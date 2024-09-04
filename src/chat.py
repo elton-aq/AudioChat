@@ -1,9 +1,10 @@
+import os
 import requests
 from groq import Groq
 
 # Função para gerar resposta usando o Llama
 def generate_answer_llama(chat_history):
-    client = Groq(api_key='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')
+    client = Groq(api_key=os.getenv("API_KEY"))
 
     try:
         chat_completion = client.chat.completions.create(
