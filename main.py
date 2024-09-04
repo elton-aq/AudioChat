@@ -10,12 +10,8 @@ def capturaAudio():
     recognizer = sr.Recognizer()
 
     with sr.Microphone() as source:
-        status_display.update(value="Wait a moment...")  # Exibe "Wait a moment..."
         recognizer.adjust_for_ambient_noise(source, duration=1)
-        print("Fale algo...")
-        status_display.update(value="Listening...")  # Exibe "Listening..."
         audio = recognizer.listen(source, phrase_time_limit=None, timeout=None)
-        status_display.update(value="Processing...")  # Exibe "Processing..."
 
     try:
         text = recognizer.recognize_google(audio, language='pt-BR')
@@ -28,16 +24,21 @@ def capturaAudio():
 
 def process_audio():
     try:
+        yield [(f"Processando fala...", None)], None, "Aguarde 2s e fale algo."
         question = capturaAudio()
-        print(f'Texto reconhecido: {question}')
+        if not question:
+            return [(f"Erro ao capturar áudio.", None)], None, "Erro ao capturar áudio."
 
+        print(f'Texto reconhecido: {question}')
         chat_history.append({"role": "user", "content": f"👤: {question}"})
 
+        yield None, None, "Gerando resposta..."
         answer = chat.generate_answer_llama(chat_history)
         print(f'Resposta Gerada: {answer}')
 
         chat_history.append({"role": "assistant", "content": f"🤖: {answer}"})
 
+        yield None, None, "Processando áudio..."
         audio_file_path = "output.mp3"
         talking.speak(answer, audio_file_path)
 
@@ -46,15 +47,19 @@ def process_audio():
             for msg in chat_history
         ]
 
-        return chat_display, audio_file_path
+        yield chat_display, audio_file_path, "Processamento completo."
 
     except Exception as e:
-        return [(f"Erro ao capturar áudio: {e}", None)], None
+        yield [(f"Erro ao processar áudio: {e}", None)], None, f"Erro ao processar áudio: {e}"
 
 with gr.Blocks() as app:
-    gr.Markdown("# Llama Chatbot\n### Chatbot de perguntas e respostas")
+    gr.Markdown("# Llama Chatbot\n### Chatbot de perguntas e respostas por voz")
 
-    chatbot = gr.Chatbot()
+    chatbot = gr.Chatbot(
+        label="Chat",
+        layout="bubble",
+        bubble_full_width=True
+    )
 
     status_display = gr.Textbox(
         label="Status",
@@ -65,18 +70,10 @@ with gr.Blocks() as app:
 
     chat_input = gr.Button("Say Something", elem_id="chat_input")
 
-    def handle_chat_input():
-        status_display.update(value="Ajustando ao ambiente... Aguarde um momento.")
+    chat_input.click(
+        fn=process_audio,
+        inputs=None,
+        outputs=[chatbot, gr.Audio(type="filepath", autoplay=True), status_display]
+    )
 
-        chat_display, audio_file_path = process_audio()
-
-        status_message = "Você pode começar a falar."
-        status_display.update(value=status_message)
-
-        return chat_display, audio_file_path, status_message
-
-    chat_input.click(fn=handle_chat_input, 
-                     inputs=None, 
-                     outputs=[chatbot, gr.Audio(type="filepath"), status_display])
-
-app.launch(share=False)
+app.launch()

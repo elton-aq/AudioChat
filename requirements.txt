@@ -1,5 +1,6 @@
 speech_recognition
+gradio
+dotenv
 requests
 groq
-pyttsx3
-python-dotenv
+gtts
