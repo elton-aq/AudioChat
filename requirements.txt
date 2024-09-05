@@ -1,6 +1,7 @@
-speech_recognition
-gradio
-dotenv
-requests
+SpeechRecognition
+gradio>=3.0
+python-dotenv
+requests==2.32.3
 groq
 gtts
+gradio_client
