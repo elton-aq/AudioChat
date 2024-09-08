@@ -71,16 +71,14 @@ with gr.Blocks() as app:
         lines=1
     )
 
-    chat_input = gr.Button("Say Something", elem_id="chat_input")
+    chat_input = gr.Button("Diga algo", elem_id="chat_input")
 
-    # Inicializando o histórico de chat no estado da sessão
     chat_history_state = gr.State([])
 
-    # O botão agora utiliza a função com o estado da sessão
     chat_input.click(
         fn=process_audio,
         inputs=[chat_history_state],
         outputs=[chatbot, gr.Audio(type="filepath", autoplay=True), status_display, chat_history_state]
     )
 
-app.launch()
+app.launch(share=True)
