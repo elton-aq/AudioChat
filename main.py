@@ -3,7 +3,6 @@ import src.chat as chat
 import src.talking as talking
 import speech_recognition as sr
 
-
 def capturaAudio():
     recognizer = sr.Recognizer()
 
@@ -15,17 +14,19 @@ def capturaAudio():
         text = recognizer.recognize_google(audio, language='pt-BR')
     except sr.UnknownValueError:
         print("Google Web Speech API não conseguiu reconhecer o áudio.")
+        return None, False
     except sr.RequestError as e:
         print(f"Erro ao solicitar resultados do serviço Google Web Speech API; {e}")
-
-    return text
+        return None, False
+    
+    return text, True
 
 def process_audio(chat_history):
     try:
         # Retornando quatro valores, incluindo o estado do histórico de chat
         yield [(f"Processando fala...", None)], None, "Aguarde um segundo e fale algo.", chat_history
-        question = capturaAudio()
-        if not question:
+        question, ret = capturaAudio()
+        if not ret:
             return [(f"Erro ao capturar áudio.", None)], None, "Erro ao capturar áudio.", chat_history
 
         print(f'Texto reconhecido: {question}')
@@ -78,7 +79,7 @@ with gr.Blocks() as app:
     chat_input.click(
         fn=process_audio,
         inputs=[chat_history_state],
-        outputs=[chatbot, gr.Audio(type="filepath", autoplay=True), status_display, chat_history_state]
+        outputs=[chatbot, gr.Audio(type="filepath", autoplay=True), status_display, chat_history_state],
     )
 
 app.launch(share=True)
