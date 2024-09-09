@@ -5,5 +5,8 @@ requests==2.32.3
 groq
 gtts
 gradio_client
-setuptools
-pyaudio
+transformers
+tensorflow
+torch
+tf-keras
+torchaudio
