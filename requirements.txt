@@ -6,3 +6,4 @@ groq
 gtts
 gradio_client
 setuptools
+pyaudio
