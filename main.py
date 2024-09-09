@@ -12,22 +12,20 @@ def capturaAudio():
 
     try:
         text = recognizer.recognize_google(audio, language='pt-BR')
-    except sr.UnknownValueError:
+        return text, True
+    except sr.UnknownValueError as e:
         print("Google Web Speech API não conseguiu reconhecer o áudio.")
-        return None, False
+        return "Não foi possivel reconhecer o áudio.", False
     except sr.RequestError as e:
         print(f"Erro ao solicitar resultados do serviço Google Web Speech API; {e}")
-        return None, False
+        return "Erro de conexão.", False
     
-    return text, True
-
 def process_audio(chat_history):
     try:
-        # Retornando quatro valores, incluindo o estado do histórico de chat
         yield [(f"Processando fala...", None)], None, "Aguarde um segundo e fale algo.", chat_history
         question, ret = capturaAudio()
         if not ret:
-            return [(f"Erro ao capturar áudio.", None)], None, "Erro ao capturar áudio.", chat_history
+            raise Exception(question)
 
         print(f'Texto reconhecido: {question}')
         chat_history.append({"role": "user", "content": f"{question}"})
@@ -50,7 +48,7 @@ def process_audio(chat_history):
         yield chat_display, audio_file_path, "Processamento completo.", chat_history
 
     except Exception as e:
-        yield [(f"Erro ao processar áudio: {e}", None)], None, f"Erro ao processar áudio: {e}", chat_history
+        yield [(f"Erro ao processar áudio: {e}", None)], None, f"Tente novamente", chat_history
 
 with gr.Blocks() as app:
     gr.Markdown("# Llama Chatbot\n### Chatbot de perguntas e respostas por voz")
