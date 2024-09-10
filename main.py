@@ -1,58 +1,48 @@
 import gradio as gr
 import src.chat as chat
 import src.talking as talking
-import speech_recognition as sr
+import src.speech as speech
 
-def capturaAudio():
-    recognizer = sr.Recognizer()
-
-    with sr.Microphone() as source:
-        recognizer.adjust_for_ambient_noise(source, duration=1)
-        audio = recognizer.listen(source, phrase_time_limit=None, timeout=None)
-
+# Função para processar o áudio e gerar a resposta
+def process_audio(audio, chat_history):
     try:
-        text = recognizer.recognize_google(audio, language='pt-BR')
-        return text, True
-    except sr.UnknownValueError as e:
-        print("Google Web Speech API não conseguiu reconhecer o áudio.")
-        return "Não foi possivel reconhecer o áudio.", False
-    except sr.RequestError as e:
-        print(f"Erro ao solicitar resultados do serviço Google Web Speech API; {e}")
-        return "Erro de conexão.", False
-    
-def process_audio(chat_history):
-    try:
-        yield [(f"Processando fala...", None)], None, "Aguarde um segundo e fale algo.", chat_history
-        question, ret = capturaAudio()
+        question, ret = speech.capturaAudio(audio)
         if not ret:
             raise Exception(question)
 
         print(f'Texto reconhecido: {question}')
         chat_history.append({"role": "user", "content": f"{question}"})
 
+        # Gera a resposta usando o modelo LLaMA
         yield None, None, "Gerando resposta...", chat_history
         answer = chat.generate_answer_llama(chat_history)
         print(f'Resposta Gerada: {answer}')
 
         chat_history.append({"role": "assistant", "content": f"{answer}"})
 
+        # Processa o áudio da resposta
         yield None, None, "Processando áudio...", chat_history
         audio_file_path = "output.mp3"
         talking.speak(answer, audio_file_path)
 
+        # Organiza o histórico do chat
         chat_display = [
             (msg['content'], None) if msg['role'] == 'user' else (None, msg['content'])
             for msg in chat_history
         ]
 
-        yield chat_display, audio_file_path, "Processamento completo.", chat_history
+        # Após o processamento, resetar o campo de áudio do usuário (sem afetar o áudio da resposta)
+        yield chat_display, audio_file_path, "Clique em RECORD para começar a falar", chat_history
 
     except Exception as e:
+        # Em caso de erro, exibe uma mensagem
         yield [(f"Erro ao processar áudio: {e}", None)], None, f"Tente novamente", chat_history
 
+# Interface Gradio
 with gr.Blocks() as app:
     gr.Markdown("# Llama Chatbot\n### Chatbot de perguntas e respostas por voz")
 
+    # Definição do chatbot e status
     chatbot = gr.Chatbot(
         label="Chat",
         layout="bubble",
@@ -65,19 +55,30 @@ with gr.Blocks() as app:
 
     status_display = gr.Textbox(
         label="Status",
-        value="Por favor, clique no botão para começar a falar",
+        value="Clique em RECORD para começar a falar",
         interactive=False,
         lines=1
     )
 
-    chat_input = gr.Button("Diga algo", elem_id="chat_input")
-
+    # Estado do histórico do chat
     chat_history_state = gr.State([])
 
-    chat_input.click(
+    # Definição do botão de entrada do áudio e chamada para processar o áudio
+    audio_input = gr.Audio(sources=["microphone"], type="filepath")
+
+    submit_btn = gr.Button("Enviar")
+
+    submit_btn.click(
         fn=process_audio,
-        inputs=[chat_history_state],
-        outputs=[chatbot, gr.Audio(type="filepath", autoplay=True), status_display, chat_history_state],
+        inputs=[audio_input, chat_history_state],
+        outputs=[chatbot, gr.Audio(type="filepath", autoplay=True, visible=False), status_display, chat_history_state]
     )
 
-app.launch(share=True)
+    # Reseta o campo de áudio gravado pelo usuário após o envio
+    submit_btn.click(
+        fn=lambda: None,
+        inputs=[],
+        outputs=[audio_input]
+    )
+
+app.launch()
