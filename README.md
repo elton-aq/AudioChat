@@ -1,9 +1,3 @@
----
-title: Audio_chat
-app_file: main.py
-sdk: gradio
-sdk_version: 4.43.0
----
 # AudioBot 
 
 Um chatbot que utiliza LLM para conversação em tempo real
@@ -59,4 +53,4 @@ Para iniciar uma conversa basta apertar uma vez no botão "Diga algo", aguardar 
 Execute o servidor localmente:
 ```bash
 python main.py
-```
+``
