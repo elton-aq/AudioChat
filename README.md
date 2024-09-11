@@ -1,3 +1,9 @@
+---
+title: AudioChat
+app_file: main.py
+sdk: gradio
+sdk_version: 4.43.0
+---
 # AudioBot 
 
 Um chatbot que utiliza LLM para conversação em tempo real

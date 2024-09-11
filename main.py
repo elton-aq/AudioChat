@@ -2,11 +2,11 @@ import gradio as gr
 import src.chat as chat
 import src.talking as talking
 import src.speech as speech
-import os
 
 # Função para processar o áudio e gerar a resposta
 def process_audio(audio, chat_history):
     try:
+        
         question, ret = speech.capturaAudio(audio)
         if not ret:
             raise Exception(question)
@@ -67,18 +67,13 @@ with gr.Blocks() as app:
     # Definição do botão de entrada do áudio e chamada para processar o áudio
     audio_input = gr.Audio(sources=["microphone"], type="filepath")
 
-    submit_btn = gr.Button("Enviar")
+    gr.ClearButton(components=audio_input, value='Limpar áudio')
 
-    submit_btn.click(
+    # Quando o áudio for alterado, processa o áudio automaticamente
+    audio_input.stop_recording(
         fn=process_audio,
         inputs=[audio_input, chat_history_state],
         outputs=[chatbot, gr.Audio(type="filepath", autoplay=True, visible=False), status_display, chat_history_state]
     )
 
-    submit_btn.click(
-        fn=lambda: None,
-        inputs=[],
-        outputs=[audio_input]
-    )
-
-app.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 7860)))
+app.launch(share=True)
