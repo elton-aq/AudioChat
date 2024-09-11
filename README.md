@@ -54,9 +54,9 @@ pip install -r requirements.txt
 
 ## Modo de uso
 
-Para iniciar uma conversa basta apertar uma vez no botão "Diga algo", aguardar um segundo para iniciar o ambiente de fala e fazer sua pergunta! O resto do processamento sera feito e retornado no chat e falado.
+Para começar a conversa, basta gravar o seu áudio. Assim que finalizar, o processamento será realizado automaticamente! Caso queira fazer outra pergunta, basta limpar o áudio anterior e gravar novamente. As respostas serão exibidas no chat, tanto em texto quanto faladas.
 
 Execute o servidor localmente:
 ```bash
 python main.py
-``
+```

@@ -6,7 +6,6 @@ import src.speech as speech
 # Função para processar o áudio e gerar a resposta
 def process_audio(audio, chat_history):
     try:
-        
         question, ret = speech.capturaAudio(audio)
         if not ret:
             raise Exception(question)
